@@ -1,0 +1,170 @@
+{
+  "manifest_version": "0.3",
+  "name": "LGM",
+  "display_name": "La Growth Machine",
+  "version": "1.1.0",
+  "description": "Connect La Growth Machine to Claude — manage campaigns, leads, audiences and conversations directly from AI.",
+  "long_description": "La Growth Machine (LGM) is a multichannel sales outreach platform. This extension gives Claude direct access to your LGM data: list campaigns, analyze performance, explore leads, read conversations, and save AI-generated preferences. No coding required — just install, enter your API key, and start asking Claude about your outreach.\n\nUsage analytics: each tool call sends a single first-party analytics event (the event name and the tool name only — no conversation content, no lead or message data) to La Growth Machine's own API at https://apiv2.lagrowthmachine.com/flow/tracking/mcp, authenticated with the same API key you provide. This is opt-out: enable the \"Disable usage analytics\" toggle (or set LGM_DISABLE_TELEMETRY=true) to stop all analytics requests. See the README and privacy policy for details.",
+  "author": {
+    "name": "La Growth Machine",
+    "url": "https://lagrowthmachine.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LaGrowthMachine/lgm-mcp"
+  },
+  "homepage": "https://lagrowthmachine.com",
+  "support": "https://help.lagrowthmachine.com",
+  "icon": "icon.png",
+  "license": "Apache-2.0",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/stdio.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/stdio.js"],
+      "env": {
+        "LGM_MCP_TRANSPORT": "stdio",
+        "LGM_API_KEY": "${user_config.api_key}",
+        "LGM_API_URL": "${user_config.api_url}",
+        "LGM_DISABLE_TELEMETRY": "${user_config.disable_telemetry}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "LGM API Key",
+      "description": "Your La Growth Machine API key",
+      "required": true,
+      "sensitive": true
+    },
+    "api_url": {
+      "type": "string",
+      "title": "API URL",
+      "description": "LGM API URL (default: https://apiv2.lagrowthmachine.com)",
+      "required": false
+    },
+    "disable_telemetry": {
+      "type": "boolean",
+      "title": "Disable usage analytics",
+      "description": "When enabled, the server sends no analytics events. By default each tool call sends one first-party event (event name + tool name only, no conversation content) to La Growth Machine's API.",
+      "required": false,
+      "default": false
+    }
+  },
+  "tools": [
+    {
+      "name": "list_campaigns",
+      "description": "List all campaigns with filters (status, search) and pagination."
+    },
+    {
+      "name": "get_campaign_stats",
+      "description": "Get detailed statistics for a campaign (acceptance rate, reply rate, conversions)."
+    },
+    {
+      "name": "get_audience_leads",
+      "description": "List leads in an audience with details (name, company, job title, email, LinkedIn)."
+    },
+    {
+      "name": "get_lead_logs",
+      "description": "Get activity logs for a lead (emails, LinkedIn messages, connection requests)."
+    },
+    {
+      "name": "get_lead_conversations",
+      "description": "Get all conversations with a lead across channels (LinkedIn, email)."
+    },
+    {
+      "name": "get_conversation_messages",
+      "description": "Get all messages in a conversation with content and timestamps."
+    },
+    {
+      "name": "get_campaign_messages",
+      "description": "Get message templates for a campaign with HTML content and sequence order."
+    },
+    {
+      "name": "get_audience",
+      "description": "Get detailed audience info (name, description, size, type, import status)."
+    },
+    {
+      "name": "save_identity_preference",
+      "description": "Save a preference for an identity to personalize AI-generated content."
+    },
+    {
+      "name": "create_audience_from_linkedin_url",
+      "description": "Create or populate an audience from a LinkedIn search, Sales Navigator search, or LinkedIn post URL."
+    },
+    {
+      "name": "list_identities",
+      "description": "List all connected identities (LinkedIn / email) for the authenticated user."
+    },
+    {
+      "name": "get_conversations_to_reply",
+      "description": "List inbox conversations waiting for the user's reply (lead spoke last, thread open)."
+    },
+    {
+      "name": "get_unread_conversations",
+      "description": "List unread inbox conversations, newest first."
+    },
+    {
+      "name": "get_favourite_conversations",
+      "description": "List favourited / starred conversations, optionally only those where the lead replied."
+    },
+    {
+      "name": "search_conversations",
+      "description": "Search and filter the whole conversation inbox by text, identity, campaign, audience, channel, status, dates and flags."
+    },
+    {
+      "name": "snooze_conversation",
+      "description": "Snooze a conversation until a later time, hiding it from the active inbox."
+    },
+    {
+      "name": "unsnooze_conversation",
+      "description": "Un-snooze a conversation, bringing it back into the active inbox."
+    },
+    {
+      "name": "archive_conversation",
+      "description": "Archive a conversation, removing it from the active inbox."
+    },
+    {
+      "name": "unarchive_conversation",
+      "description": "Restore an archived conversation back to the active inbox."
+    },
+    {
+      "name": "list_members",
+      "description": "List the members (users) of the account — needed to pick a memberId for sending LinkedIn messages."
+    },
+    {
+      "name": "send_linkedin_message",
+      "description": "Send a LinkedIn text or voice message to a lead from a connected identity."
+    },
+    {
+      "name": "send_email_message",
+      "description": "Send an email to a lead from a connected email identity (new thread or reply)."
+    },
+    {
+      "name": "get_linkedin_post",
+      "description": "Fetch a public LinkedIn post's text, author, and engagement metrics from its URL."
+    }
+  ],
+  "keywords": [
+    "sales",
+    "outreach",
+    "campaigns",
+    "leads",
+    "prospecting",
+    "multichannel",
+    "linkedin",
+    "email",
+    "la growth machine",
+    "lagrowthmachine"
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.12.20",
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "privacy_policies": ["https://lagrowthmachine.com/privacy-policy/"]
+}
