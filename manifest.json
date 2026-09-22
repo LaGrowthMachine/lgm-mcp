@@ -1,0 +1,242 @@
+{
+  "manifest_version": "0.3",
+  "name": "LGM",
+  "display_name": "La Growth Machine",
+  "version": "1.7.2",
+  "description": "Connect La Growth Machine to Claude — manage campaigns, leads, audiences and conversations directly from AI.",
+  "long_description": "La Growth Machine (LGM) is a multichannel sales outreach platform. This extension gives Claude direct access to your LGM data: list campaigns, analyze performance, explore leads, read conversations, and save AI-generated preferences. No coding required — just install, enter your API key, and start asking Claude about your outreach.\n\nUsage analytics: each tool call sends a single first-party analytics event (the event name and the tool name only — no conversation content, no lead or message data) to La Growth Machine's own API at https://apiv2.lagrowthmachine.com/flow/tracking/mcp, authenticated with the same API key you provide. This is opt-out: enable the \"Disable usage analytics\" toggle (or set LGM_DISABLE_TELEMETRY=true) to stop all analytics requests. See the README and privacy policy for details.",
+  "author": {
+    "name": "La Growth Machine",
+    "url": "https://lagrowthmachine.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LaGrowthMachine/lgm-mcp"
+  },
+  "homepage": "https://lagrowthmachine.com",
+  "support": "https://help.lagrowthmachine.com",
+  "icon": "icon.png",
+  "license": "Apache-2.0",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/stdio.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/stdio.js"],
+      "env": {
+        "LGM_MCP_TRANSPORT": "stdio",
+        "LGM_API_KEY": "${user_config.api_key}",
+        "LGM_API_URL": "${user_config.api_url}",
+        "LGM_DISABLE_TELEMETRY": "${user_config.disable_telemetry}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "LGM API Key",
+      "description": "Your La Growth Machine API key",
+      "required": true,
+      "sensitive": true
+    },
+    "api_url": {
+      "type": "string",
+      "title": "API URL",
+      "description": "LGM API URL (default: https://apiv2.lagrowthmachine.com)",
+      "required": false
+    },
+    "disable_telemetry": {
+      "type": "boolean",
+      "title": "Disable usage analytics",
+      "description": "When enabled, the server sends no analytics events. By default each tool call sends one first-party event (event name + tool name only, no conversation content) to La Growth Machine's API.",
+      "required": false,
+      "default": false
+    }
+  },
+  "tools": [
+    {
+      "name": "list_campaigns",
+      "description": "List all campaigns with filters (status, search) and pagination."
+    },
+    {
+      "name": "get_campaign_stats",
+      "description": "Get detailed statistics for a campaign (acceptance rate, reply rate, conversions)."
+    },
+    {
+      "name": "get_audience_leads",
+      "description": "List leads in an audience with the full lead record: identity & contact fields plus location, industry, shortBio, companyUrl, gender, twitter, persoEmail, relationsCount, enrichStatus, emailStatus, emailFoundBy, signal, crm_id, audience names and customAttribute1-20."
+    },
+    {
+      "name": "get_lead_logs",
+      "description": "Get activity logs for a lead (emails, LinkedIn messages, connection requests)."
+    },
+    {
+      "name": "get_lead_conversations",
+      "description": "Get all conversations with a lead across channels (LinkedIn, email)."
+    },
+    {
+      "name": "get_conversation_messages",
+      "description": "Get all messages in a conversation with content and timestamps."
+    },
+    {
+      "name": "get_campaign_messages",
+      "description": "Get message templates for a campaign with HTML content and sequence order."
+    },
+    {
+      "name": "duplicate_campaign",
+      "description": "Duplicate a campaign with its sequence and step templates into a new draft campaign."
+    },
+    {
+      "name": "edit_campaign_message",
+      "description": "Replace the content (and email subject) of a campaign step's existing message."
+    },
+    {
+      "name": "get_campaign_steps",
+      "description": "List a campaign's message steps with stepId, channel, order, and whether a message is already attached."
+    },
+    {
+      "name": "add_campaign_step_message",
+      "description": "Create a message and link it to an empty campaign step (stepId from get_campaign_steps)."
+    },
+    {
+      "name": "rename_campaign",
+      "description": "Rename a campaign (name must be unique across your campaigns)."
+    },
+    {
+      "name": "set_campaign_audience",
+      "description": "Assign or change the audience of a not-yet-started campaign (audienceId from list_audiences)."
+    },
+    {
+      "name": "set_campaign_setting",
+      "description": "Enable or disable one boolean campaign setting: autoEnrich, outOfOffice, skipAlreadyContacted or ignoreEmojiOnlyReplies (the last two require a READY or PAUSED campaign)."
+    },
+    {
+      "name": "set_campaign_crm_sync",
+      "description": "Enable or disable CRM sync (HubSpot and/or Pipedrive) on a paused campaign; requires the CRM plan permission."
+    },
+    {
+      "name": "pause_campaign",
+      "description": "Pause a RUNNING campaign (its leads' pending actions are put on hold until resumed); edits made while paused are not retroactive."
+    },
+    {
+      "name": "resume_campaign",
+      "description": "Resume a PAUSED campaign (leads pick up their sequence where they stopped); subject to plan limits."
+    },
+    {
+      "name": "get_audience",
+      "description": "Get detailed audience info (name, description, size, type, import status)."
+    },
+    {
+      "name": "save_identity_preference",
+      "description": "Save a preference for an identity to personalize AI-generated content."
+    },
+    {
+      "name": "create_audience_from_linkedin_url",
+      "description": "Create or populate an audience from a LinkedIn search, Sales Navigator search, LinkedIn post URL, or LinkedIn event URL (imports attendees — identity must be registered to the event)."
+    },
+    {
+      "name": "list_audiences",
+      "description": "List every audience of the workspace with id, name, and leadsCount. Use to resolve an audienceId by name — including right after create_audience_from_linkedin_url."
+    },
+    {
+      "name": "get_credits",
+      "description": "Return the credit balance for the authenticated account (total + perishable). Check before spending or on user demand (\"combien de crédits ?\")."
+    },
+    {
+      "name": "enrich_lead",
+      "description": "Enrich a lead's pro email and/or LinkedIn profile fields. Spends credits. Two-step lockstep: preview (confirm=false) → surface cost → confirm=true + acknowledgedCostCredits=exact-preview-value."
+    },
+    {
+      "name": "get_enrich_result",
+      "description": "Poll the result of an enrichment request created via enrich_lead — returns status and, once completed, the enriched data (proEmail, phone, etc.)."
+    },
+    {
+      "name": "list_identities",
+      "description": "List all connected identities (LinkedIn / email) for the authenticated user."
+    },
+    {
+      "name": "create_lead",
+      "description": "Create a lead — or update it in place (upsert). Attach it to an audience, set profile fields, write the lead's note, and use the 20 custom-attribute slots for personalization notes."
+    },
+    {
+      "name": "get_conversations_to_reply",
+      "description": "List inbox conversations waiting for the user's reply (lead spoke last, thread open)."
+    },
+    {
+      "name": "get_unread_conversations",
+      "description": "List unread inbox conversations, newest first."
+    },
+    {
+      "name": "get_favourite_conversations",
+      "description": "List favourited / starred conversations, optionally only those where the lead replied."
+    },
+    {
+      "name": "search_conversations",
+      "description": "Search and filter the whole conversation inbox by text, identity, campaign, audience, channel, status, dates and flags."
+    },
+    {
+      "name": "snooze_conversation",
+      "description": "Snooze a conversation until a later time, hiding it from the active inbox."
+    },
+    {
+      "name": "unsnooze_conversation",
+      "description": "Un-snooze a conversation, bringing it back into the active inbox."
+    },
+    {
+      "name": "archive_conversation",
+      "description": "Archive a conversation, removing it from the active inbox."
+    },
+    {
+      "name": "unarchive_conversation",
+      "description": "Restore an archived conversation back to the active inbox."
+    },
+    {
+      "name": "list_members",
+      "description": "List the members (users) of the account — needed to pick a memberId for sending LinkedIn messages."
+    },
+    {
+      "name": "list_workspaces",
+      "description": "List the workspaces the authenticated user can act in — returns multiWorkspace and each workspace's id, name, plan, and which is current; only pass workspaceId to other tools when multiWorkspace is true."
+    },
+    {
+      "name": "send_linkedin_message",
+      "description": "Send a LinkedIn text or voice message to a lead from a connected identity."
+    },
+    {
+      "name": "send_email_message",
+      "description": "Send an email to a lead from a connected email identity (new thread or reply)."
+    },
+    {
+      "name": "enrich_linkedin_post",
+      "description": "Fetch a public LinkedIn post's text, author, and engagement metrics from its URL. Spends 1 credit per call, after an explicit cost confirmation."
+    },
+    {
+      "name": "ask_your_outbound",
+      "description": "Run a read-only BigQuery SELECT over the workspace's activity logs (campaign actions, replies, opens, clicks, bounces). Call get_bigquery_logs_guide once first for the schema and verified metric definitions."
+    },
+    {
+      "name": "get_bigquery_logs_guide",
+      "description": "Return the full BigQuery logs guide: schema, verified metric definitions, and example queries. Read it before writing analytics with ask_your_outbound."
+    }
+  ],
+  "keywords": [
+    "sales",
+    "outreach",
+    "campaigns",
+    "leads",
+    "prospecting",
+    "multichannel",
+    "linkedin",
+    "email",
+    "la growth machine",
+    "lagrowthmachine"
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.12.20",
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "privacy_policies": ["https://lagrowthmachine.com/privacy-policy/"]
+}
