@@ -1,0 +1,18 @@
+# Configuration gitleaks du dépôt : reprend les règles par défaut et déclare les faux positifs connus.
+# À placer à la racine du dépôt sous le nom .gitleaks.toml.
+title = "LGM gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Faux positifs connus"
+paths = [
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)yarn\.lock$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''\.(png|jpg|jpeg|gif|svg|ico|woff2?)$''',
+]
+regexes = [
+  '''EXAMPLE_KEY_[A-Z0-9]+''',
+]
