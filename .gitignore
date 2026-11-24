@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.*
+*.log
+docker-compose.override.yml
+.DS_Store
+*.mcpb
