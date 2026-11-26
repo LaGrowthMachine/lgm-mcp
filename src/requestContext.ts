@@ -1,0 +1,70 @@
+/*
+ * Copyright 2026 La Growth Machine
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ */
+import { AsyncLocalStorage } from "node:async_hooks";
+
+interface RequestContext {
+  apiUrl?: string;
+  apiKey?: string;
+  // Workspace ciblé pour l'appel courant (Model 2). Posé par tool depuis son param `workspaceId`,
+  // lu par callFlow pour le header X-LGM-Workspace. Absent = workspace racine du humain (cas courant).
+  workspaceId?: string;
+  // User-agent du client MCP entrant (ex: "Claude-User", "claude-code/2.1.201 (cli)") — lu par
+  // callFlow pour forwarder la surface cliente à l'API dans l'UA sortant. Absent en mode stdio.
+  clientUserAgent?: string;
+  // Demande le code de second facteur à l'humain, par elicitation MCP. Posé par tool, et seulement
+  // si le client déclare la capacité `elicitation` : lu par callFlow pour prouver puis rejouer un
+  // appel refusé, sans que l'assistant ait à orchestrer. Absent = repli sur la consigne rendue à
+  // l'assistant par handleToolError.
+  elicitTwoFactorCode?: () => Promise<string | undefined>;
+}
+
+export const requestContext = new AsyncLocalStorage<RequestContext>();
+
+const ALLOWED_API_URL_PATTERNS = [
+  /^https:\/\/([a-z0-9-]+\.)*lagrowthmachine\.com$/,
+  /^https:\/\/([a-z0-9-]+\.)*lagrowthmachine\.xyz$/,
+  /^https:\/\/[a-z0-9-]+\.preview\.lgmfeatureenv7\.com$/,
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+];
+
+export const isAllowedApiUrl = (url: string): boolean => {
+  return ALLOWED_API_URL_PATTERNS.some((pattern) => pattern.test(url));
+};
+
+const resolveEnvUrl = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.startsWith("${")) return undefined;
+  return trimmed;
+};
+
+export const getTwoFactorCodeElicitor = (): (() => Promise<string | undefined>) | undefined => {
+  return requestContext.getStore()?.elicitTwoFactorCode;
+};
+
+export const getApiUrl = (): string => {
+  const context = requestContext.getStore();
+  return (
+    context?.apiUrl ||
+    resolveEnvUrl(process.env.LGM_API_URL) ||
+    "https://apiv2.lagrowthmachine.com"
+  );
+};
+
+export const getApiKey = (): string => {
+  const context = requestContext.getStore();
+  return context?.apiKey || process.env.LGM_API_KEY || "";
+};
+
+export const getWorkspaceId = (): string | undefined => {
+  return requestContext.getStore()?.workspaceId;
+};
+
+export const getClientUserAgent = (): string | undefined => {
+  return requestContext.getStore()?.clientUserAgent;
+};
